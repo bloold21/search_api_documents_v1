@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: 一系列用于芯灵前端与后端交互的API。此文档中所列API不会开放给普通用户
 servers:
-  - url: /ga4gh/tes/v1
+  - url: http://192.168.50.100:5010/
 tags:
   - name: BOM
   - name: Search
