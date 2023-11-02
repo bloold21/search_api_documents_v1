@@ -8,7 +8,6 @@ servers:
 tags:
   - name: BOM
   - name: Search
-  
 paths:
   /bom_components_match:
     post:
@@ -22,20 +21,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Materials'
+              type: array
+              items:
+                $ref: '#/components/schemas/Material'
         required: true
       responses:
-        '200': 
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BOMMatchResult'
-  
-  /get_suppplier_info_by_component_id/{component_id}:
+                
+  /get_supplier_parts_component_id/{component_id}:
     get:
-      tags: 
-          - Search
+      tags:
+        - Search
       summary: 根据id查询供应链信息
       responses:
         '200':
@@ -44,18 +45,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupplierParts'
-                
       parameters:
         - name: component_id
           in: path
           description: phyical part id
-          required: True
+          required: true
           schema:
             type: integer
             
-  /search_components_by_description:
+  /search_component_by_desc:
     get:
-      tags: 
+      tags:
         - Search
       summary: 按照描述查找器件
       responses:
@@ -67,24 +67,66 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ComponentSearchResult'
-      
       parameters:
-        - name: comment
-          in: query
-          required: True
+        - in: query
+          name: q
           schema:
             type: string
-        
+            
+  /get_component_by_component_id/{component_id}:
+    get:
+      tags:
+        - Search
+      summary: 根据id查询器件信息
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Part'
+      parameters:
+        - name: component_id
+          in: path
+          description: phyical part id
+          required: true
+          schema:
+            type: integer
+            
+  /get_component_details_by_component_id/{component_id}:
+    get:
+      tags:
+        - Search
+      summary: 根据id查询器件详细信息，包括文档，模型和参数
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PartDetail'
+      parameters:
+        - name: component_id
+          in: path
+          description: phyical part id
+          required: true
+          schema:
+            type: integer
+  
 components:
   schemas:
-    Materials:
-      type: array
-      items:
-        $ref: '#/components/schemas/Material'
-  
+        
     Material:
       type: object
       properties:
+        line_no:
+          type: string
+          description: 物料在BOM中的位置
+          example: 10
         mpn:
           type: string
           example: DSS24
@@ -105,7 +147,6 @@ components:
         comment:
           type: string
           example: 2.2uH 4.3A
-          
     Specs:
       type: array
       items:
@@ -117,8 +158,6 @@ components:
           value:
             type: string
             example: 1 nF
-            
-    
     TechDocs:
       type: array
       items:
@@ -137,7 +176,6 @@ components:
               - tech drawing
               - pcn
               - compliance
-              
     EdaModels:
       type: array
       items:
@@ -145,15 +183,15 @@ components:
         properties:
           uri:
             type: string
-          model_name:
+          name:
             type: string
-          model_type:
+          typ:
             type: string
             enum:
               - 3d
               - eda
               - simulation
-          model_sub_type:
+          sub_typ:
             type: string
             enum:
               - step
@@ -176,12 +214,14 @@ components:
               - orcad_allegro
               - easyeda
               - kicad
-    
+              
     SupplierParts:
       type: array
       items:
         type: object
         properties:
+          component_id:
+            type: integer
           sku:
             type: string
             example: ICM-42688-P
@@ -191,7 +231,7 @@ components:
           packaging:
             type: string
             example: Tape and Reel
-          factory_lead_dats:
+          factory_lead_days:
             type: integer
             example: 30
           distributor:
@@ -199,7 +239,8 @@ components:
             example: Digikey
           distributor_url:
             type: string
-            example: https://www.digikey.com/en/products/detail/phoenix-contact/1751248/2511016
+            example: >-
+              https://www.digikey.com/en/products/detail/phoenix-contact/1751248/2511016
           prices:
             type: array
             items:
@@ -210,7 +251,7 @@ components:
                   example: usd
                 price:
                   type: number
-                  example: 15.0
+                  example: 15
           price_break:
             type: array
             items:
@@ -218,21 +259,16 @@ components:
           stock:
             type: integer
             example: 15989
-    
-          
     Part:
       type: object
       properties:
-        id:
+        component_id:
           description: physical part id
           type: integer
           example: 2958605
         mpn:
           type: string
           example: MURRPE5C1H102J2K!A
-        mpn_normalized:
-          type: string
-          example: murrpe5c1h102j2ka
         manufacturer:
           type: string
           example: Murata
@@ -251,10 +287,11 @@ components:
         image:
           type: string
           description: component image uri
-        
-           
+        datasheet:
+          type: string
+          
     PartDetail:
-      allOf: 
+      allOf:
         - $ref: '#/components/schemas/Part'
         - type: object
           properties:
@@ -263,60 +300,51 @@ components:
             tech_docs:
               $ref: '#/components/schemas/TechDocs'
             models:
-               $ref: '#/components/schemas/EdaModels'
-    
+              $ref: '#/components/schemas/EdaModels'
+              
     ComponentSearchResult:
-      type: object
-      properties:
-        hits:
-          type: array
-          items:
-            allOf:
-              - $ref: '#/components/schemas/Part'
-              - type: object
-                properties:
-                  currency:
-                    type: string
-                  price:
-                    type: number
-                  has_stock:
-                    type: boolean
-                  distributor:
-                    type: string
-                    example: Digikey
-                  signals:
-                    description: 搜索程序分析comment得到的搜索关键词
-                    type: array
-                    items:
+      type: array
+      items:
+        allOf:
+          - $ref: '#/components/schemas/Part'
+          - type: object
+            properties:
+              keywords:
+                description: 搜索程序分析comment得到的搜索关键词
+                type: array
+                items:
+                  type: string
+              highlights:
+                description: 搜索命中的字段，可用于计算置信度
+                type: array
+                items:
+                  type: object
+                  properties:
+                    filed:
                       type: string
-                  highlights:
-                    description: 搜索命中的字段，可用于计算置信度
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        filed:
-                          type: string
-                          enum:
-                            - spec
-                            - key_spec
-                            - mpn
-                            - mpn_normalized
-                            - category
-                            - manufacturer
-                            - package
-                        value:
-                          type: string
-            
-            
+                      enum:
+                        - spec
+                        - key_spec
+                        - mpn
+                        - mpn_normalized
+                        - category
+                        - manufacturer
+                        - package
+                    value:
+                      type: string
+    
     BOMMatchResult:
-      allOf:
-        - $ref: '#/components/schemas/ComponentSearchResult'
-        - type: object
-          properties:
-            lineNo:
-              type: integer
-              example: 10
+      type: array
+      items:
+        type: object
+        properties:
+          source:
+              $ref: '#/components/schemas/Material'
+          parts:
+            type: array
+            items:
+              $ref: '#/components/schemas/ComponentSearchResult'
+
         
         
         
