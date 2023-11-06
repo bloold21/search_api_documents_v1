@@ -33,6 +33,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/BOMMatchResult'
                 
+  /get_supplier_parts_component_id_batch:
+    post:
+      tags:
+        - Search
+      summary: 根据id列表批量查询供应链信息
+      requestBody:
+        description: component id列表
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+              example: [1, 2, 3]
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierParts'
+      
+                
   /get_supplier_parts_component_id/{component_id}:
     get:
       tags:
@@ -342,7 +366,3 @@ components:
               $ref: '#/components/schemas/Material'
           parts:
               $ref: '#/components/schemas/ComponentSearchResult'
-
-        
-        
-        
