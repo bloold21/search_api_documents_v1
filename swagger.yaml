@@ -107,7 +107,6 @@ paths:
           schema:
             type: boolean
   
-  /search_component_by_parameters:  
     post:
       tags:
         - Search
