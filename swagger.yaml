@@ -106,6 +106,96 @@ paths:
           description: 是否返回聚合计数
           schema:
             type: boolean
+  
+  /search_component_by_parameters:  
+    post:
+      tags:
+        - Search
+      summary: 按照描述与条件查找器件
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComponentSearchResultCollection'
+      requestBody:
+        description: 描述与条件
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                aggregations:
+                  type: boolean
+                  description: 是否返回切片
+                highlights:
+                  type: boolean
+                source:
+                  type: boolean
+                  description: 返回数据中是否需要包含器件数据，与aggregations不能同时为False
+                query:
+                  type: string
+                  example: 贴片电感，0201
+                size:
+                  type: integer
+                  example: 20
+                from:
+                  type: integer
+                  example: 0
+                parameters:
+                  type: object
+                  description: 查询条件，条件之间为“与”关系
+                  properties:
+                    mpn:
+                      type: array
+                      items:
+                        type: string
+                        example: BLM03HG102SN1D
+                    manufacturer:
+                      type: array
+                      items:
+                        type: string
+                        example: Murata
+                    manufacturer_id:
+                      type: array
+                      items:
+                        type: integer
+                        example: 5139
+                    category:
+                      type: array
+                      items:
+                        type: string
+                        example: Ferrite Beads and Chips
+                    category_id:
+                      type: array
+                      items:
+                        type: integer
+                        example: 161
+                    package:
+                      type: array
+                      items:
+                        type: string
+                        example: 0201
+                    specs:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: Current Rating
+                          values:
+                            type: array
+                            items:
+                              type: string
+                              example: 125 mA
+                
+        required: true
+      
+      
             
   /get_component_by_component_id/{component_id}:
     get:
@@ -409,3 +499,4 @@ components:
               $ref: '#/components/schemas/Material'
           parts:
               $ref: '#/components/schemas/ComponentSearchResult'
+            
