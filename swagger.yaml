@@ -8,7 +8,119 @@ servers:
 tags:
   - name: BOM
   - name: Search
+  - name: Analyze
 paths:
+  /cut:
+    get:
+      summary: 对搜索语句进行分词
+      tags:
+        - Analyze
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          example: CAP CER 4.7UF 25V X5R 0603
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+                example:
+                      [[
+                          "CAP",
+                          "CER",
+                          "4.7UF",
+                          "25V",
+                          "X5R",
+                          "0603"
+                      ]
+                  ]
+                  
+  /analyze:
+    post:
+      summary: 对单条material进行分析
+      description: ''
+      operationId: ''
+      tags:
+        - Analyze
+      requestBody:
+        description: Update an existent pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Material'
+        required: true        
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Signal'
+                  
+              example: [
+                  {
+                      "endpoint": "mpn",
+                      "unit": null,
+                      "value": "CC0402KRX7R7BB104"
+                  },
+                  {
+                      "endpoint": "category",
+                      "unit": null,
+                      "value": "Capacitors"
+                  },
+                  {
+                      "endpoint": "numeric_keyword",
+                      "unit": null,
+                      "value": "0402"
+                  },
+                  {
+                      "endpoint": "category",
+                      "unit": null,
+                      "value": "Capacitors"
+                  },
+                  {
+                      "endpoint": "numeric_keyword",
+                      "unit": "volt",
+                      "value": "16"
+                  },
+                  {
+                      "endpoint": "category",
+                      "unit": null,
+                      "value": "Ceramic Capacitors"
+                  },
+                  {
+                      "endpoint": "numeric_keyword",
+                      "unit": "micro-farad",
+                      "value": "0.1"
+                  },
+                  {
+                      "endpoint": "attr.temperature_characteristic",
+                      "unit": null,
+                      "value": "X7R"
+                  },
+                  {
+                      "endpoint": "package",
+                      "unit": null,
+                      "value": "0402"
+                  },
+                  {
+                      "endpoint": "org_text",
+                      "unit": null,
+                      "value": "CAP CER 0.1UF 16V X7R 0402"
+                  }
+              ]
+                
+  
   /bom_components_match:
     post:
       summary: 为BOM中的物料匹配器件
@@ -23,7 +135,17 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Material'
+                allOf:
+                  - $ref: '#/components/schemas/Material'
+                  - type: object
+                    properties:
+                      signals:
+                        description: 如果提供，则使用传入的信号进行匹配
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Signal'
+                      
+                
         required: true
       responses:
         '200':
@@ -138,6 +260,12 @@ paths:
                 query:
                   type: string
                   example: 贴片电感，0201
+                signals:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Signal'
+                  description: 通过分析query得到的信号，如提供，则强制使用传入的信号进行搜索
+                  
                 size:
                   type: integer
                   example: 20
@@ -498,4 +626,20 @@ components:
               $ref: '#/components/schemas/Material'
           parts:
               $ref: '#/components/schemas/ComponentSearchResult'
+              
+    Signal:
+      type: object
+      properties:
+        endpoint:
+          type: string
+        unit:
+          type: string
+        value:
+          type: string
+      example: 
+          {
+              "endpoint": "numeric_keyword",
+              "unit": "micro-farad",
+              "value": "0.1"
+          }
             
