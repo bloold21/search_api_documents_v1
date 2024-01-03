@@ -33,16 +33,12 @@ paths:
                   items:
                     type: string
                 example:
-                      [[
-                          "CAP",
-                          "CER",
-                          "4.7UF",
-                          "25V",
-                          "X5R",
-                          "0603"
-                      ]
-                  ]
-                  
+                  - - CAP
+                    - CER
+                    - 4.7UF
+                    - 25V
+                    - X5R
+                    - '0603'
   /analyze:
     post:
       summary: 对单条material进行分析
@@ -56,7 +52,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Material'
-        required: true        
+        required: true
       responses:
         '200':
           description: Successful operation
@@ -66,61 +62,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Signal'
-                  
-              example: [
-                  {
-                      "endpoint": "mpn",
-                      "unit": null,
-                      "value": "CC0402KRX7R7BB104"
-                  },
-                  {
-                      "endpoint": "category",
-                      "unit": null,
-                      "value": "Capacitors"
-                  },
-                  {
-                      "endpoint": "numeric_keyword",
-                      "unit": null,
-                      "value": "0402"
-                  },
-                  {
-                      "endpoint": "category",
-                      "unit": null,
-                      "value": "Capacitors"
-                  },
-                  {
-                      "endpoint": "numeric_keyword",
-                      "unit": "volt",
-                      "value": "16"
-                  },
-                  {
-                      "endpoint": "category",
-                      "unit": null,
-                      "value": "Ceramic Capacitors"
-                  },
-                  {
-                      "endpoint": "numeric_keyword",
-                      "unit": "micro-farad",
-                      "value": "0.1"
-                  },
-                  {
-                      "endpoint": "attr.temperature_characteristic",
-                      "unit": null,
-                      "value": "X7R"
-                  },
-                  {
-                      "endpoint": "package",
-                      "unit": null,
-                      "value": "0402"
-                  },
-                  {
-                      "endpoint": "org_text",
-                      "unit": null,
-                      "value": "CAP CER 0.1UF 16V X7R 0402"
-                  }
-              ]
-                
-  
+              example:
+                - endpoint: mpn
+                  unit: null
+                  value: CC0402KRX7R7BB104
+                - endpoint: category
+                  unit: null
+                  value: Capacitors
+                - endpoint: numeric_keyword
+                  unit: null
+                  value: '0402'
+                - endpoint: category
+                  unit: null
+                  value: Capacitors
+                - endpoint: numeric_keyword
+                  unit: volt
+                  value: '16'
+                - endpoint: category
+                  unit: null
+                  value: Ceramic Capacitors
+                - endpoint: numeric_keyword
+                  unit: micro-farad
+                  value: '0.1'
+                - endpoint: attr.temperature_characteristic
+                  unit: null
+                  value: X7R
+                - endpoint: package
+                  unit: null
+                  value: '0402'
+                - endpoint: org_text
+                  unit: null
+                  value: CAP CER 0.1UF 16V X7R 0402
   /bom_components_match:
     post:
       summary: 为BOM中的物料匹配器件
@@ -144,8 +116,6 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Signal'
-                      
-                
         required: true
       responses:
         '200':
@@ -154,7 +124,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BOMMatchResult'
-                
   /get_supplier_parts_component_id_batch:
     post:
       tags:
@@ -168,7 +137,10 @@ paths:
               type: array
               items:
                 type: integer
-              example: [1, 2, 3]
+              example:
+                - 1
+                - 2
+                - 3
         required: true
       responses:
         '200':
@@ -177,8 +149,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupplierParts'
-      
-                
   /get_supplier_parts_component_id/{component_id}:
     get:
       tags:
@@ -198,7 +168,6 @@ paths:
           required: true
           schema:
             type: integer
-            
   /search_component_by_desc:
     get:
       tags:
@@ -228,7 +197,6 @@ paths:
           description: 是否返回聚合计数
           schema:
             type: boolean
-  
     post:
       tags:
         - Search
@@ -265,7 +233,6 @@ paths:
                   items:
                     $ref: '#/components/schemas/Signal'
                   description: 通过分析query得到的信号，如提供，则强制使用传入的信号进行搜索
-                  
                 size:
                   type: integer
                   example: 20
@@ -305,7 +272,7 @@ paths:
                       type: array
                       items:
                         type: string
-                        example: 0201
+                        example: 201
                     specs:
                       type: array
                       items:
@@ -319,11 +286,7 @@ paths:
                             items:
                               type: string
                               example: 125 mA
-                
         required: true
-      
-      
-            
   /get_component_by_component_id/{component_id}:
     get:
       tags:
@@ -345,7 +308,6 @@ paths:
           required: true
           schema:
             type: integer
-            
   /get_component_details_by_component_id/{component_id}:
     get:
       tags:
@@ -367,10 +329,89 @@ paths:
           required: true
           schema:
             type: integer
-  
+            
+            
+  /search_component_aggregation:
+    post:
+      tags:
+        - Search
+      summary: 返回搜索结果的聚合切片
+      requestBody:
+        description: 描述与条件
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  example: 贴片电感，0201
+                signals:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Signal'
+                  description: 通过分析query得到的信号，如提供，则强制使用传入的信号进行搜索
+                parameters:
+                  type: object
+                  description: 查询条件，条件之间为“与”关系
+                  properties:
+                    mpn:
+                      type: array
+                      items:
+                        type: string
+                        example: BLM03HG102SN1D
+                    manufacturer:
+                      type: array
+                      items:
+                        type: string
+                        example: Murata
+                    manufacturer_id:
+                      type: array
+                      items:
+                        type: integer
+                        example: 5139
+                    category:
+                      type: array
+                      items:
+                        type: string
+                        example: Ferrite Beads and Chips
+                    category_id:
+                      type: array
+                      items:
+                        type: integer
+                        example: 161
+                    package:
+                      type: array
+                      items:
+                        type: string
+                        example: 201
+                    specs:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: Current Rating
+                          values:
+                            type: array
+                            items:
+                              type: string
+                              example: 125 mA
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bucket'
+      
+    
 components:
   schemas:
-        
     Material:
       type: object
       properties:
@@ -409,10 +450,9 @@ components:
           value:
             type: string
             example: 1.0 ampere
-          value_display: 
+          value_display:
             type: string
             example: 1 A
-          
     TechDocs:
       type: array
       items:
@@ -469,7 +509,6 @@ components:
               - orcad_allegro
               - easyeda
               - kicad
-              
     SupplierParts:
       type: array
       items:
@@ -544,7 +583,6 @@ components:
           description: component image uri
         datasheet:
           type: string
-          
     PartDetail:
       allOf:
         - $ref: '#/components/schemas/Part'
@@ -556,7 +594,6 @@ components:
               $ref: '#/components/schemas/TechDocs'
             models:
               $ref: '#/components/schemas/EdaModels'
-              
     ComponentSearchResult:
       type: array
       items:
@@ -582,7 +619,6 @@ components:
                         - package
                     value:
                       type: string
-                      
     Bucket:
       type: object
       properties:
@@ -596,7 +632,6 @@ components:
             allOf:
               - $ref: '#/components/schemas/Bucket'
       example: '{name: specs, count: 1257, buckets:[{name: temp, count: 543}]}'
-      
     ComponentSearchResultCollection:
       type: object
       properties:
@@ -610,23 +645,24 @@ components:
           type: array
           items:
             type: string
-          example: ['connector', 'pins:2', 'green']
+          example:
+            - connector
+            - pins:2
+            - green
         aggregation:
           type: array
           items:
             allOf:
               - $ref: '#/components/schemas/Bucket'
-    
     BOMMatchResult:
       type: array
       items:
         type: object
         properties:
           source:
-              $ref: '#/components/schemas/Material'
+            $ref: '#/components/schemas/Material'
           parts:
-              $ref: '#/components/schemas/ComponentSearchResult'
-              
+            $ref: '#/components/schemas/ComponentSearchResult'
     Signal:
       type: object
       properties:
@@ -636,10 +672,7 @@ components:
           type: string
         value:
           type: string
-      example: 
-          {
-              "endpoint": "numeric_keyword",
-              "unit": "micro-farad",
-              "value": "0.1"
-          }
-            
+      example:
+        endpoint: numeric_keyword
+        unit: micro-farad
+        value: '0.1'
