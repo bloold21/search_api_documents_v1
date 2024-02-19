@@ -398,7 +398,7 @@ paths:
                             items:
                               type: string
                               example: 125 mA
-                parm_aggs:
+                param_aggs:
                   description: 指定要返回的属性聚合，如果不提供，则接口不返回任何与属性相关的聚合
                   type: array
                   items:
