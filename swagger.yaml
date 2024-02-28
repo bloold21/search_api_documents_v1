@@ -39,6 +39,34 @@ paths:
                     - 25V
                     - X5R
                     - '0603'
+  
+  /check_keywords:
+    post:
+      summary: 检查一条字符串是否可能为合法的MPN
+      description: ""
+      tags:
+        - Analyze
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items: 
+                type: string
+            example: ["4k7", "7D471K"]
+        required: True
+      responses:
+        '200':
+          description: Successful operation
+          content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    type: boolean
+                example: [false, true]
+  
+  
   /analyze:
     post:
       summary: 对单条material进行分析
