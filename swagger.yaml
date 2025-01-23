@@ -315,6 +315,37 @@ paths:
                               type: string
                               example: 125 mA
         required: true
+        
+  /search_component_by_mpn:
+    post:
+      tags:
+        - Search
+      summary: 按照mpn与mfg搜索器件
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ComponentSearchResultCollection'
+              
+      requestBody:
+        description: 描述与条件
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mpn:
+                  type: string
+                  description: 型号
+                mfg:
+                  type: string
+                  description: 制造商
+              
+        required: true
   /get_component_by_component_id/{component_id}:
     get:
       tags:
